@@ -1,3 +1,12 @@
 <resources>
     <string name="app_name">Cinemanager</string>
+    <string name="bar_title_tv_my_order">我的订单</string>
+    <string name="bar_title_tv_add_order">添加订单</string>
+    <string name="bar_title_tv_view_cinema">查看影院</string>
+    <string name="bar_title_tv_add_cinema">添加影院</string>
+    <string name="bar_title_tv_exit">退出</string>
+    <string name="bar_title_searchkw">请输入关键词搜索</string>
+    <string name="print_movie_name">请输入电影名称</string>
+    <string name="choose_watch_time">选择观影时间</string>
+    <string name="print_price">请输入票价</string>
 </resources>
