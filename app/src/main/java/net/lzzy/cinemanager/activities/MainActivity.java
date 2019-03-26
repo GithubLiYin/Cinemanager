@@ -1,6 +1,7 @@
 package net.lzzy.cinemanager.activities;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentManager;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -11,12 +12,14 @@ import android.widget.SearchView;
 import android.widget.TextView;
 
 import net.lzzy.cinemanager.R;
+import net.lzzy.cinemanager.fragments.CinemasFragment;
+import net.lzzy.cinemanager.fragments.OrdersFragment;
 
 /**
  * @author Administrator
  */
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
-
+    private FragmentManager manager = getSupportFragmentManager();
     private LinearLayout layoutMenu;
     private TextView tvTitle;
     private SearchView searchView;
@@ -34,7 +37,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void sliTitle() {
         layoutMenu = findViewById(R.id.bar_title_layout_menu);
         layoutMenu.setVisibility(View.GONE);
-        findViewById(R.id.bar_title_layout_menu).setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.bar_title_iv_menu).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 int visible = layoutMenu.getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE;
@@ -42,15 +45,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
         tvTitle = findViewById(R.id.bar_title_tv);
-        tvTitle.setText(R.string.bar_title_tv_my_order);
+        tvTitle.setText("我的订单");
         searchView = findViewById(R.id.bar_title_sv);
-        findViewById(R.id.bar_title_iv_menu).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                layoutMenu.setVisibility(View.VISIBLE);
-
-            }
-        });
         findViewById(R.id.bar_title_tv_my_order).setOnClickListener(this);
         findViewById(R.id.bar_title_tv_add_order).setOnClickListener(this);
         findViewById(R.id.bar_title_tv_view_cinema).setOnClickListener(this);
@@ -65,23 +61,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View v) {
+        layoutMenu.setVisibility(View.GONE);
         switch (v.getId()) {
-            case R.id.bar_title_tv_my_order:
+            case R.id.bar_title_tv_add_cinema:
+                break;
 
+            case R.id.bar_title_tv_view_cinema:
+                tvTitle.setText("查看影院");
+                manager.beginTransaction().replace(R.id.fragment_container, new CinemasFragment())
+                        .commit();
                 break;
             case R.id.bar_title_tv_add_order:
-                addOrderView.setVisibility(View.VISIBLE);
-                layoutMenu.setVisibility(View.GONE);
                 break;
-            case R.id.bar_title_tv_add_cinema:
-                Intent intent = new Intent(this, CinemasActivity.class);
-                intent.putExtra(EXTRA_NEW_CINEMA, true);
-                startActivity(intent);
-                finish();
-                break;
-            case R.id.bar_title_tv_view_cinema:
-                startActivity(new Intent(this, CinemasActivity.class));
-                finish();
+
+            case R.id.bar_title_tv_my_order:
+                tvTitle.setText("我的订单");
+                manager.beginTransaction().replace(R.id.fragment_container, new OrdersFragment())
+                        .commit();
                 break;
             default:
                 break;
