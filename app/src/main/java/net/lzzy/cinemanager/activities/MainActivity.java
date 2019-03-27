@@ -1,10 +1,12 @@
 package net.lzzy.cinemanager.activities;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
-import android.content.Intent;
 import android.os.Bundle;
+import android.util.SparseArray;
 import android.view.View;
 import android.view.Window;
 import android.widget.LinearLayout;
@@ -20,6 +22,8 @@ import net.lzzy.cinemanager.fragments.OrdersFragment;
  */
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private FragmentManager manager = getSupportFragmentManager();
+    private SparseArray<Fragment> fragmentArray=new SparseArray<>();
+    private SparseArray<String> titleArray = new SparseArray<>();
     private LinearLayout layoutMenu;
     private TextView tvTitle;
     private SearchView searchView;
@@ -35,6 +39,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void sliTitle() {
+        titleArray.put(R.id.bar_title_tv_my_order, "我的订单");
+        titleArray.put(R.id.bar_title_tv_add_order, "添加订单");
+        titleArray.put(R.id.bar_title_tv_view_cinema, "查看影院");
+        titleArray.put(R.id.bar_title_tv_add_cinema, "添加影院");
         layoutMenu = findViewById(R.id.bar_title_layout_menu);
         layoutMenu.setVisibility(View.GONE);
         findViewById(R.id.bar_title_iv_menu).setOnClickListener(new View.OnClickListener() {
@@ -62,25 +70,33 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onClick(View v) {
         layoutMenu.setVisibility(View.GONE);
-        switch (v.getId()) {
+        tvTitle.setText(titleArray.get(v.getId()));
+        FragmentTransaction transaction=manager.beginTransaction();
+        Fragment fragment = fragmentArray.get(v.getId());
+        if (fragment == null) {
+            fragment = createFragment(v.getId());
+            fragmentArray.put(v.getId(), fragment);
+            transaction.add(R.id.fragment_container,fragment);
+        }
+        for (Fragment f:manager.getFragments()){
+            transaction.hide(f);
+        }
+        transaction.show(fragment).commit();
+    }
+
+    private Fragment createFragment(int id) {
+        switch (id) {
             case R.id.bar_title_tv_add_cinema:
-                break;
-
+               break;
             case R.id.bar_title_tv_view_cinema:
-                tvTitle.setText("查看影院");
-                manager.beginTransaction().replace(R.id.fragment_container, new CinemasFragment())
-                        .commit();
-                break;
+                return new CinemasFragment();
             case R.id.bar_title_tv_add_order:
-                break;
-
+              break;
             case R.id.bar_title_tv_my_order:
-                tvTitle.setText("我的订单");
-                manager.beginTransaction().replace(R.id.fragment_container, new OrdersFragment())
-                        .commit();
-                break;
+               return new OrdersFragment();
             default:
                 break;
         }
+        return null ;
     }
 }
