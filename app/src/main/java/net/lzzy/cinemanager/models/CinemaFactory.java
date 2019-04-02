@@ -20,16 +20,17 @@ public class CinemaFactory {
     }
 
     private CinemaFactory() {
-        repository = new SqlRepository<>(AppUtils.getContext(),Cinema.class, DbConstants.packager);
+        repository = new SqlRepository<>(AppUtils.getContext(), Cinema.class, DbConstants.packager);
     }
 
-    public List<Cinema> get(){
+    public List<Cinema> get() {
         return repository.get();
     }
 
-    public Cinema getById(String id){
+    public Cinema getById(String id) {
         return repository.getById(id);
     }
+
 
     public List<Cinema> searchCinemas(String kw){
         List<Cinema> result = new ArrayList<>();
