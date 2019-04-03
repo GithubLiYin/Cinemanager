@@ -1,5 +1,8 @@
 package net.lzzy.cinemanager.models;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import net.lzzy.sqllib.Ignored;
 import net.lzzy.sqllib.Sqlitable;
 
@@ -7,7 +10,7 @@ import net.lzzy.sqllib.Sqlitable;
  * Created by lzzy_gxy on 2019/3/11.
  * Description:
  */
-public class Cinema extends BaseEntity implements Sqlitable {
+public class Cinema extends BaseEntity implements Sqlitable, Parcelable {
     @Ignored
     static final String COL_LOCATION = "location";
     private String name;
@@ -15,6 +18,27 @@ public class Cinema extends BaseEntity implements Sqlitable {
     private String province;
     private String city;
     private String area;
+    public Cinema(){}
+
+    protected Cinema(Parcel in) {
+        name = in.readString();
+        location = in.readString();
+        province = in.readString();
+        city = in.readString();
+        area = in.readString();
+    }
+@Ignored
+    public static final Creator<Cinema> CREATOR = new Creator<Cinema>() {
+        @Override
+        public Cinema createFromParcel(Parcel in) {
+            return new Cinema(in);
+        }
+
+        @Override
+        public Cinema[] newArray(int size) {
+            return new Cinema[size];
+        }
+    };
 
     public String getName() {
         return name;
@@ -79,5 +103,19 @@ public class Cinema extends BaseEntity implements Sqlitable {
         }else {
             return false;
         }
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(name);
+        dest.writeString(location);
+        dest.writeString(province);
+        dest.writeString(city);
+        dest.writeString(area);
     }
 }

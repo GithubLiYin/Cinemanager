@@ -1,19 +1,16 @@
 package net.lzzy.cinemanager.fragments;
 
-import android.app.AlertDialog;
+import android.content.Context;
+import android.os.Bundle;
 import android.text.TextUtils;
-import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Button;
-import android.widget.ImageView;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
 import net.lzzy.cinemanager.R;
 import net.lzzy.cinemanager.models.Cinema;
 import net.lzzy.cinemanager.models.CinemaFactory;
 import net.lzzy.cinemanager.models.Order;
-import net.lzzy.cinemanager.utils.AppUtils;
 import net.lzzy.sqllib.GenericAdapter;
 import net.lzzy.sqllib.ViewHolder;
 
@@ -26,21 +23,21 @@ import java.util.List;
  */
 public class CinemasFragment extends BaseFragment {
 
+    private static final String ARG_NEW_ORDER="argNewOrder";
     private Cinema cinema;
     private ListView listView;
     private List<Cinema> cinemas;
     private CinemaFactory factory = CinemaFactory.getInstance();
+    private OnCinemaSelectedListener listener;
     private View empty;
     private GenericAdapter<Cinema> adapter;
-    private double MIX_DISTANCE=100;
-    private boolean isDelete;
-    private ImageView img;
 
-    public CinemasFragment() {
-    }
-
-    public CinemasFragment(Cinema cinema) {
-        this.cinema = cinema;
+    public static CinemasFragment newInstance(Cinema cinema){
+        CinemasFragment fragment=new CinemasFragment();
+        Bundle args=new Bundle();
+        args.putParcelable(ARG_NEW_ORDER,cinema);
+        fragment.setArguments(args);
+        return fragment;
     }
 
     @Override
@@ -55,61 +52,8 @@ public class CinemasFragment extends BaseFragment {
                 viewHolder.setTextView(R.id.cinema_item_tv_name, cinema.getName())
                         .setTextView(R.id.cinema_item_tv_location, cinema.getLocation());
 
-                Button btn = viewHolder.getView(R.id.cinema_item_btn);
-                btn.setOnClickListener(v -> new AlertDialog.Builder(getActivity())
-                        .setTitle("删除确认")
-                        .setMessage("要删除订单吗？")
-                        .setNegativeButton("取消", null)
-                        .setPositiveButton("确认", (dialog, which) ->
-                                adapter.remove(cinema)).show());
-                viewHolder.getConvertView().setOnTouchListener(new View.OnTouchListener() {
-
-                    private float touchX2;
-                    private float touchX1;
-
-                    @Override
-                    public boolean onTouch(View v, MotionEvent event) {
-                        slideToDelete(event, cinema, btn);
-                        return true;
-                    }
-
-                    private void slideToDelete(MotionEvent event, Cinema cinema, Button btn) {
-                        switch (event.getAction()) {
-                            case MotionEvent.ACTION_DOWN:
-                                touchX1 = event.getX();
-                                break;
-                            case MotionEvent.ACTION_UP:
-                                touchX2 = event.getX();
-                                if (touchX1 - touchX2 > MIX_DISTANCE) {
-                                    if (!isDelete) {
-                                        btn.setVisibility(View.VISIBLE);
-                                        isDelete = true;
-                                    }
-                                } else {
-                                    if (btn.isShown()) {
-                                        btn.setVisibility(View.GONE);
-                                        isDelete = false;
-                                    } else {
-                                        clickOrder(cinema);
-                                    }
-                                }
-                                break;
-                            default:
-                                break;
-                        }
-                    }
-                });
             }
 
-            private void clickOrder(Cinema cinema) {
-                cinema=CinemaFactory.getInstance().getById(cinema.getId().toString());
-                String content = "[" + cinema.getName() + "]"+cinema.getLocation();
-                View view= LayoutInflater.from(getActivity()).inflate(R.layout.dialog_qrcode,null);
-                ImageView img=view.findViewById(R.id.dialog_qrcode_img);
-                img.setImageBitmap(AppUtils.createQRCodeBitmap(content,300,300));
-                new AlertDialog.Builder(getActivity())
-                        .setView(view).show();
-            }
 
             @Override
             public boolean persistInsert(Cinema cinema) {
@@ -122,9 +66,27 @@ public class CinemasFragment extends BaseFragment {
             }
         };
         listView.setAdapter(adapter);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                listener.OnCinemaSelected(adapter
+                        .getItem(position).getId().toString());
+            }
+        });
         if (cinema != null) {
             save(cinema);
         }
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        try {
+            listener = (OnCinemaSelectedListener) context;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(context.toString() + "必须实现onCinemaCreateListener");
+        }
+
     }
 
     public void save(Cinema cinema) {
@@ -145,5 +107,9 @@ public class CinemasFragment extends BaseFragment {
             cinemas.addAll(factory.searchCinemas(kw));
         }
         adapter.notifyDataSetChanged();
+    }
+
+    public interface OnCinemaSelectedListener {
+        void OnCinemaSelected(String cinemaId);
     }
 }

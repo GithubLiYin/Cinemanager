@@ -27,7 +27,7 @@ public class CinemaFactory {
         return repository.get();
     }
 
-    public Cinema getById(String id) {
+      public Cinema getById(String id) {
         return repository.getById(id);
     }
 

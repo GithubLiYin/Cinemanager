@@ -65,6 +65,8 @@ public class AddOrderFragment extends BaseFragment {
     private boolean isdelete=false;
     private Spinner spCinema;
 
+
+
     @Override
     protected void populate() {
         listener.hideSearch();

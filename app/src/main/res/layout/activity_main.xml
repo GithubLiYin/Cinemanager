@@ -6,7 +6,10 @@
     android:layout_height="match_parent"
     android:orientation="horizontal"
     tools:context=".activities.MainActivity">
-
+    <ImageView android:id="@+id/activity_cat"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/timg"/>
     <FrameLayout
         android:id="@+id/fragment_container"
         android:layout_width="match_parent"

@@ -6,15 +6,9 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.TextView;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
 
 import net.lzzy.cinemanager.R;
 import net.lzzy.cinemanager.models.Cinema;
@@ -28,37 +22,37 @@ import net.lzzy.sqllib.ViewHolder;
 import java.util.List;
 
 /**
- *
  * @author lzzy_gxy
  * @date 2019/3/26
  * Description:
  */
 public class OrdersFragment extends BaseFragment {
+    public static final String ARG_NEW_ORDER="order";
     private Order order;
-    private ListView listView;
     private List<Order> orders;
     private OrderFactory factory = OrderFactory.getInstance();
-    private View empty;
     private GenericAdapter<Order> adapter;
     private ImageView img;
     private float touchX2;
     private boolean isDelete;
-    private double MNT_DISTANCE =100;
+    public static final int MIX_DISTANCE = 50;
 
-    public OrdersFragment() {
+    public static OrdersFragment newInstance(Order order){
+        OrdersFragment fragment=new OrdersFragment();
+        Bundle args=new Bundle();
+        args.putParcelable(ARG_NEW_ORDER,order);
+        fragment.setArguments(args);
+        return fragment;
     }
 
-    public OrdersFragment(Order order) {
-        this.order = order;
-    }
     @Override
     protected void populate() {
-        ListView lv=find(R.id.activity_cinemas_lv);
-        //View empty=find(R.id.item_zero);
-        //lv.setEmptyView(empty);
-        factory=OrderFactory.getInstance();
-        orders=factory.get();
-        adapter=new GenericAdapter<Order>(getActivity(),R.layout.cinema_item,orders) {
+        ListView lv = find(R.id.activity_cinemas_lv);
+        View empty = find(R.id.activity_cinemas_tv_none);
+        lv.setEmptyView(empty);
+        factory = OrderFactory.getInstance();
+        orders = factory.get();
+        adapter = new GenericAdapter<Order>(getActivity(), R.layout.cinema_item, orders) {
             @Override
             public void populate(ViewHolder holder, Order order) {
                 String location = CinemaFactory.getInstance()
@@ -70,8 +64,13 @@ public class OrdersFragment extends BaseFragment {
                         .setTitle("删除确认")
                         .setMessage("要删除订单吗？")
                         .setNegativeButton("取消", null)
-                        .setPositiveButton("确认", (dialog, which) ->
-                                adapter.remove(order)).show());
+                        .setPositiveButton("确认", (dialog, which) -> {
+                            isDelete = false;
+                            adapter.remove(order);
+
+                        }).show());
+                int visible = isDelete ? View.VISIBLE : View.GONE;
+                btn.setVisibility(visible);
                 holder.getConvertView().setOnTouchListener(new View.OnTouchListener() {
 
                     private float touchX1;
@@ -89,7 +88,7 @@ public class OrdersFragment extends BaseFragment {
                                 break;
                             case MotionEvent.ACTION_UP:
                                 touchX2 = event.getX();
-                                if (touchX1 - touchX2 > MNT_DISTANCE) {
+                                if (touchX1 - touchX2 > MIX_DISTANCE) {
                                     if (!isDelete) {
                                         btn.setVisibility(View.VISIBLE);
                                         isDelete = true;
@@ -121,15 +120,15 @@ public class OrdersFragment extends BaseFragment {
             }
         };
         lv.setAdapter(adapter);
-        if(order!=null){
+        if (order != null) {
             save(order);
         }
     }
 
     private void clickOrder(Order order) {
-        Cinema cinema=CinemaFactory.getInstance().getById(order.getCinemaId().toString());
+        Cinema cinema = CinemaFactory.getInstance().getById(order.getCinemaId().toString());
         String content = "[" + order.getMovie() + "]" + order.getMovieTime() + "\n" + cinema.toString() + "票价" + order.getPrice() + "元";
-        View view= LayoutInflater.from(getActivity()).inflate(R.layout.dialog_qrcode,null);
+        View view = LayoutInflater.from(getActivity()).inflate(R.layout.dialog_qrcode, null);
         img = view.findViewById(R.id.dialog_qrcode_img);
         img.setImageBitmap((AppUtils.createQRCodeBitmap(content, 300, 300)));
         new AlertDialog.Builder(getActivity())
@@ -144,6 +143,7 @@ public class OrdersFragment extends BaseFragment {
     public void save(Order order) {
         adapter.add(order);
     }
+
     @Override
     public void search(String kw) {
         orders.clear();
